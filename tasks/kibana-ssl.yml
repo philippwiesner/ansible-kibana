@@ -1,0 +1,121 @@
+---
+- name: Create the kibana keystore if it doesn't exist yet
+  become: yes
+  command: >
+    {{kibana_home}}/bin/kibana-keystore create --allow-root
+  args:
+    creates: "{{ kibana_conf_dir }}/kibana.keystore"
+  environment:
+    KIBANA_PATH_CONF: "{{ kibana_conf_dir }}"
+
+- name: Ensure certificate directory exists
+  become: yes
+  file:
+    dest: "{{ kibana_ssl_certificate_path }}"
+    state: directory
+    owner: root
+    group: "{{ kibana_group }}"
+    mode: "750"
+  when: kibana_ssl_upload
+
+- name: Upload SSL/TLS keystore
+  become: yes
+  copy:
+    src: "{{ kibana_ssl_keystore }}"
+    dest: "{{ kibana_ssl_certificate_path }}/{{ kibana_ssl_keystore | basename }}"
+    owner: "{{ kibana_user }}"
+    group: "{{ kibana_group }}"
+    mode: "640"
+  when: kibana_ssl_upload and kibana_ssl_keystore
+  notify: restart kibana
+  register: copy_keystore
+
+- name: Upload SSL/TLS key and certificate
+  become: yes
+  copy:
+    src: "{{ item }}"
+    dest: "{{ kibana_ssl_certificate_path }}/{{ item | basename }}"
+    owner: "{{ kibana_user }}"
+    group: "{{ kibana_group }}"
+    mode: "640"
+  with_items:
+    - "{{ kibana_ssl_key }}"
+    - "{{ kibana_ssl_certificate }}"
+  when: kibana_ssl_upload and kibana_ssl_key and kibana_ssl_certificate
+  #Restart if these change
+  notify: restart kibana
+  register: copy_certificates
+
+- name: Upload Elastic SSL Certificate Authority
+  become: yes
+  copy:
+    src: "{{ kibana_ssl_elastic_certificate_authority }}"
+    dest: "{{ es_ssl_certificate_path }}/{{ kibana_ssl_elastic_certificate_authority | basename }}"
+    owner: "{{ kibana_user }}"
+    group: "{{ kibana_group }}"
+    mode: "640"
+  #Restart if this changes
+  notify: restart kibana
+  when: (kibana_ssl_elastic_certificate_authority is defined) and (kibana_ssl_elastic_certificate_authority|length > 0)
+
+- name: Set keystore password
+  become: yes
+  shell: echo "{{ kibana_ssl_keystore_password }}" | {{ kibana_home }}/bin/kibana-keystore add 'server.ssl.keystore.password' --force --stdin --allow-root
+  no_log: False
+  when: kibana_ssl_keystore_password and copy_keystore.changed
+
+- name: Remove keystore password
+  become: yes
+  shell: "{{ kibana_home }}/bin/kibana-keystore remove 'server.ssl.keystore.password' --allow-root"
+  when: kibana_ssl_keystore_password == "" and copy_keystore.changed
+  ignore_errors: yes
+
+- name: Set elastic truststore password
+  become: yes
+  shell: echo "{{ kibana_ssl_elastic_truststore_password }}" | {{ kibana_home }}/bin/kibana-keystore add 'elasticsearch.ssl.truststore.password' --force --stdin --allow-root
+  no_log: False
+  when: kibana_ssl_elastic_truststore_password and copy_keystore.changed
+
+- name: Remove elastic truststore password
+  become: yes
+  shell: "{{ kibana_home }}/bin/kibana-keystore remove 'elasticsearch.ssl.truststore.password' --allow-root"
+  when: kibana_ssl_elastic_truststore_password == "" and copy_keystore.changed
+  ignore_errors: yes
+
+- name: Set key password
+  become: yes
+  shell: echo "{{ kibana_ssl_key_password }}" | {{ kibana_home }}/bin/kibana-keystore add 'server.ssl.keyPassphrase' --force --stdin --allow-root
+  no_log: False
+  when: kibana_ssl_key_password and copy_certificates.changed
+
+- name: Remove key password
+  become: yes
+  shell: "{{ kibana_home }}/bin/kibana-keystore remove 'elasticsearch.ssl.keyPassphrase' --allow-root"
+  when: kibana_ssl_key_password == "" and copy_certificates.changed
+  ignore_errors: yes
+
+- name: Set elastic key password
+  become: yes
+  shell: echo "{{ kibana_ssl_elastic_key_password }}" | {{ kibana_home }}/bin/kibana-keystore add 'elasticsearch.ssl.keyPassphrase' --force --stdin --allow-root
+  no_log: False
+  when: kibana_ssl_elastic_key_password and copy_certificates.changed
+
+- name: Remove elastic key password
+  become: yes
+  shell: "{{ kibana_home }}/bin/kibana-keystore remove 'server.ssl.keyPassphrase' --allow-root"
+  when: kibana_ssl_elastic_key_password == "" and copy_certificates.changed
+  ignore_errors: yes
+
+- name: include kibana-security.yml
+  include: kibana-security.yml
+  tags:
+    - config
+
+- name: Set kibana.keystore permissions
+  become: yes
+  file:
+    state: file
+    path: "{{ kibana_conf_dir }}/kibana.keystore"
+    owner: root
+    group: "{{ kibana_group }}"
+    mode: "0660"

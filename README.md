@@ -140,6 +140,31 @@ To define proxy globaly, set the following variables:
 * `es_proxy_host` - global proxy host
 * `es_proxy_port` - global proxy port
 
+### Security
+
+* `kibana_keystore`: adds or remove keys in kibana keystore:
+  ```
+  kibana_keystore:
+    add:
+      - key: secret_key
+        value: secret_key_value
+    remove:
+      - key: secret_key
+  ```
+* `kibana_enable_server_ssl`: enables server SSL/TLS
+* `kibana_ssl_certificate_path`: cert path
+* `kibana_ssl_upload`: upload certs
+* `kibana_ssl_keystore`: PKCS12 keystore
+* `kibana_ssl_keystore_password`: PKCS12 keystore password
+* `kibana_ssl_certificate`: X509 certificate
+* `kibana_ssl_key`: X509 certificate key
+* `kibana_ssl_key_password`: X509 certificate key password
+* `kibana_enable_elastic_ssl`: enable elastic SSL/TLS
+  When `kibana_ssl_keystore` is set, this one will be used as a truststore for elastic communication
+* `kibana_ssl_elastic_truststore_password`: same as `kibana_ssl_keystore_password`
+* `kibana_ssl_elastic_certificate_authority`: X509 encrypted CA
+* `kibana_ssl_elastic_verificationMode`: certificate verification mode
+
 ## Notes
 
 * The role assumes the user/group exists on the server.  The Kibana packages create the default kibana user. If this needs to be changed, ensure the user exists.

@@ -24,6 +24,11 @@
   tags:
     - config
 
+- name: include kibana-ssl.yml
+  include: kibana-ssl.yml
+  tags:
+    - config
+
 - name: flush handlers
   meta: flush_handlers
 
