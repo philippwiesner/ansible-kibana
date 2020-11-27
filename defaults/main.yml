@@ -8,6 +8,20 @@ es_apt_url: "deb https://artifacts.elastic.co/packages/{{ es_repo_name }}/apt st
 es_apt_url_old: "deb http://packages.elastic.co/elasticsearch/{{ es_repo_name }}/debian stable main"
 
 # Kibana parameters
+kibana_ssl_keystore: ""
+kibana_ssl_keystore_password: ""
+kibana_ssl_key: ""
+kibana_ssl_key_password: ""
+kibana_ssl_elastic_truststore_password: ""
+kibana_ssl_elastic_key_password: ""
+kibana_ssl_certificate: ""
+kibana_ssl_elastic_certificate_authority: ""
+kibana_ssl_certificate_path: "{{ kibana_conf_dir }}/certs"
+kibana_ssl_upload: true
+kibana_enable_server_ssl: false
+kibana_enable_elastic_ssl: false
+kibana_ssl_elastic_verificationMode: certificate
+kibana_keystore: ""
 kibana_install_oss: false
 kibana_package_name: "kibana"
 kibana_version_lock: false
