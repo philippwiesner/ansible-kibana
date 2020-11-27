@@ -1,0 +1,35 @@
+---
+- name: Get list of current keystore entries
+  become: yes
+  command: >
+    {{kibana_home}}/bin/kibana-keystore list --allow-root
+  register: list_keystore
+  changed_when: False
+  environment:
+    KIBANA_PATH_CONF: "{{ kibana_conf_dir }}"
+  check_mode: no
+
+- name: Remove keystore entries
+  become: yes
+  command: >
+    {{kibana_home}}/bin/kibana-keystore remove '{{item.key}}' --allow-root
+  with_items: "{{kibana_keystore.remove}}"
+  when: kibana_keystore.remove is defined and (kibana_keystore.remove | length > 0) and item.key in list_keystore.stdout_lines and 'bootstrap.password' not in item.key
+
+- name: Reload keystore entries
+  become: yes
+  command: >
+    {{kibana_home}}/bin/kibana-keystore list --allow-root
+  register: list_keystore
+  changed_when: False
+  environment:
+    KIBANA_PATH_CONF: "{{ kibana_conf_dir }}"
+  check_mode: no
+
+- name: Add keystore entries
+  become: yes
+  shell: >
+    echo "{{item.value}}" | {{kibana_home}}/bin/kibana-keystore add '{{item.key}}' --stdin --force --allow-root
+  with_items: "{{kibana_keystore.add}}"
+  when: kibana_keystore.add is defined and (kibana_keystore.add | length > 0) and item.key not in list_keystore.stdout_lines and 'bootstrap.password' not in item.key
+  no_log: true

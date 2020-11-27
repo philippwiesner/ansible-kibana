@@ -10,7 +10,6 @@
     state: directory
     owner: "{{ kibana_user }}"
     group: "{{ kibana_group }}"
-    recurse: yes
   loop:
     - "{{ log_dir }}"
     - "{{ conf_dir }}"
