@@ -2,7 +2,7 @@
 - name: Create the kibana keystore if it doesn't exist yet
   become: yes
   command: >
-    {{kibana_home}}/bin/kibana-keystore create --allow-root
+    {{kibana_home}}/bin/kibana-keystore create
   args:
     creates: "{{ kibana_conf_dir }}/kibana.keystore"
   environment:
@@ -60,49 +60,49 @@
 
 - name: Set keystore password
   become: yes
-  shell: echo "{{ kibana_ssl_keystore_password }}" | {{ kibana_home }}/bin/kibana-keystore add 'server.ssl.keystore.password' --force --stdin --allow-root
+  shell: echo "{{ kibana_ssl_keystore_password }}" | {{ kibana_home }}/bin/kibana-keystore add 'server.ssl.keystore.password' --force --stdin
   no_log: False
   when: kibana_ssl_keystore_password and copy_keystore.changed
 
 - name: Remove keystore password
   become: yes
-  shell: "{{ kibana_home }}/bin/kibana-keystore remove 'server.ssl.keystore.password' --allow-root"
+  shell: "{{ kibana_home }}/bin/kibana-keystore remove 'server.ssl.keystore.password' "
   when: kibana_ssl_keystore_password == "" and copy_keystore.changed
   ignore_errors: yes
 
 - name: Set elastic truststore password
   become: yes
-  shell: echo "{{ kibana_ssl_elastic_truststore_password }}" | {{ kibana_home }}/bin/kibana-keystore add 'elasticsearch.ssl.truststore.password' --force --stdin --allow-root
+  shell: echo "{{ kibana_ssl_elastic_truststore_password }}" | {{ kibana_home }}/bin/kibana-keystore add 'elasticsearch.ssl.truststore.password' --force --stdin
   no_log: False
   when: kibana_ssl_elastic_truststore_password and copy_keystore.changed
 
 - name: Remove elastic truststore password
   become: yes
-  shell: "{{ kibana_home }}/bin/kibana-keystore remove 'elasticsearch.ssl.truststore.password' --allow-root"
+  shell: "{{ kibana_home }}/bin/kibana-keystore remove 'elasticsearch.ssl.truststore.password' "
   when: kibana_ssl_elastic_truststore_password == "" and copy_keystore.changed
   ignore_errors: yes
 
 - name: Set key password
   become: yes
-  shell: echo "{{ kibana_ssl_key_password }}" | {{ kibana_home }}/bin/kibana-keystore add 'server.ssl.keyPassphrase' --force --stdin --allow-root
+  shell: echo "{{ kibana_ssl_key_password }}" | {{ kibana_home }}/bin/kibana-keystore add 'server.ssl.keyPassphrase' --force --stdin
   no_log: False
   when: kibana_ssl_key_password and copy_certificates.changed
 
 - name: Remove key password
   become: yes
-  shell: "{{ kibana_home }}/bin/kibana-keystore remove 'elasticsearch.ssl.keyPassphrase' --allow-root"
+  shell: "{{ kibana_home }}/bin/kibana-keystore remove 'elasticsearch.ssl.keyPassphrase' "
   when: kibana_ssl_key_password == "" and copy_certificates.changed
   ignore_errors: yes
 
 - name: Set elastic key password
   become: yes
-  shell: echo "{{ kibana_ssl_elastic_key_password }}" | {{ kibana_home }}/bin/kibana-keystore add 'elasticsearch.ssl.keyPassphrase' --force --stdin --allow-root
+  shell: echo "{{ kibana_ssl_elastic_key_password }}" | {{ kibana_home }}/bin/kibana-keystore add 'elasticsearch.ssl.keyPassphrase' --force --stdin
   no_log: False
   when: kibana_ssl_elastic_key_password and copy_certificates.changed
 
 - name: Remove elastic key password
   become: yes
-  shell: "{{ kibana_home }}/bin/kibana-keystore remove 'server.ssl.keyPassphrase' --allow-root"
+  shell: "{{ kibana_home }}/bin/kibana-keystore remove 'server.ssl.keyPassphrase' "
   when: kibana_ssl_elastic_key_password == "" and copy_certificates.changed
   ignore_errors: yes
 

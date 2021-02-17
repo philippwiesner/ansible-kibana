@@ -2,7 +2,7 @@
 - name: Get list of current keystore entries
   become: yes
   command: >
-    {{kibana_home}}/bin/kibana-keystore list --allow-root
+    {{kibana_home}}/bin/kibana-keystore list
   register: list_keystore
   changed_when: False
   environment:
@@ -12,14 +12,14 @@
 - name: Remove keystore entries
   become: yes
   command: >
-    {{kibana_home}}/bin/kibana-keystore remove '{{item.key}}' --allow-root
+    {{kibana_home}}/bin/kibana-keystore remove '{{item.key}}'
   with_items: "{{kibana_keystore.remove}}"
   when: kibana_keystore.remove is defined and (kibana_keystore.remove | length > 0) and item.key in list_keystore.stdout_lines and 'bootstrap.password' not in item.key
 
 - name: Reload keystore entries
   become: yes
   command: >
-    {{kibana_home}}/bin/kibana-keystore list --allow-root
+    {{kibana_home}}/bin/kibana-keystore list
   register: list_keystore
   changed_when: False
   environment:
@@ -29,7 +29,7 @@
 - name: Add keystore entries
   become: yes
   shell: >
-    echo "{{item.value}}" | {{kibana_home}}/bin/kibana-keystore add '{{item.key}}' --stdin --force --allow-root
+    echo "{{item.value}}" | {{kibana_home}}/bin/kibana-keystore add '{{item.key}}' --stdin --force
   with_items: "{{kibana_keystore.add}}"
   when: kibana_keystore.add is defined and (kibana_keystore.add | length > 0) and item.key not in list_keystore.stdout_lines and 'bootstrap.password' not in item.key
   no_log: true
