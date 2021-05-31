@@ -78,3 +78,4 @@ server_ssl_key_passphrase: ''
 secure_settings: false
 #Enable OIDC integration
 es_enable_oidc: false
+python2_interpreter: /bin/python

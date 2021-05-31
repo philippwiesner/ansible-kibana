@@ -10,6 +10,8 @@
   until: result is not failed
   retries: 5
   delay: 10
+  vars:
+    ansible_python_interpreter: "{{ python2_interpreter }}"
 
 - name: RedHat - Check if repo exists
   stat:
@@ -53,6 +55,8 @@
         name: "{{ kibana_inverted_package_name }}"
         state: absent
       when: kibana_inverted_package_name in ansible_facts.packages
+      vars:
+        ansible_python_interpreter: "{{ python2_interpreter }}"
 
 - name: RedHat - Install kibana
   become: yes
@@ -66,6 +70,8 @@
   until: result is not failed
   retries: 5
   delay: 10
+  vars:
+    ansible_python_interpreter: "{{ python2_interpreter }}"
 
 - name: RedHat - Install Kibana from url
   become: yes
@@ -80,3 +86,5 @@
   until: kibana_install_from_package is not failed
   retries: 5
   delay: 10
+  vars:
+    ansible_python_interpreter: "{{ python2_interpreter }}"

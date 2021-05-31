@@ -9,6 +9,8 @@
   until: result is not failed
   retries: 5
   delay: 10
+  vars:
+    ansible_python_interpreter: "{{ python2_interpreter }}"
 
 - name: RedHat - lock kibana version
   become: yes
