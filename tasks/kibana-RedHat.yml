@@ -41,6 +41,8 @@
     - name: RedHat - Check if other package is installed
       package_facts:
         manager: "auto"
+      vars:
+        ansible_python_interpreter: "{{ python2_interpreter }}"
 
     - name: RedHat - stop {{ kibana_inverted_package_name }}
       become: yes
